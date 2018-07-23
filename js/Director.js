@@ -1,6 +1,6 @@
 import { DataStore } from "./base/DataStore.js";
-import { UpPencil } from "./runtime/UpPencil.js";
-import { DownPencil } from "./runtime/DownPencil.js";
+import { PencilLeft } from "./runtime/PencilLeft.js";
+import { PencilRight } from "./runtime/PencilRight.js";
 
 // 导演类 (控制游戏的逻辑)
 export class Director {
@@ -16,19 +16,21 @@ export class Director {
     }
 
     createPencil() {
-        const minTop = DataStore.getInstance().canvas.height / 8;
-        const maxTop = DataStore.getInstance().canvas.height / 2;
+        const minTop = DataStore.getInstance().canvas.width / 8;
+        const maxTop = DataStore.getInstance().canvas.width / 2;
         const top = minTop + Math.random() * (maxTop - minTop);
-        this.dataStore.get('pencils').push(new UpPencil(top));
-        this.dataStore.get('pencils').push(new DownPencil(top));
+        this.dataStore.get('pencils').push(new PencilLeft(top));
+        this.dataStore.get('pencils').push(new PencilRight(top));
     }
 
     // 屏幕点击事件
     birdsEvent() {
+        let birds = this.dataStore.get('birds');
         for (let i = 0; i <= 2; i++) {
-            this.dataStore.get('birds').y[i] = this.dataStore.get('birds').birdsY[i];
+            birds.x[i] = birds.birdsX[i];
         }
-        this.dataStore.get('birds').time = 0;
+        birds.time = 0;
+        birds.changeDirection = !birds.changeDirection;
     }
 
     // 判断小鸟是否和铅笔撞击
@@ -47,11 +49,10 @@ export class Director {
     // 判断小鸟是否撞击地面和铅笔
     check() {
         const birds = this.dataStore.get('birds');
-        const land = this.dataStore.get('land');
         const pencils = this.dataStore.get('pencils');
         const score = this.dataStore.get('score');
-        // 地板的撞击判断
-        if (birds.birdsY[0] + birds.birdsHeight[0] >= land.y) {
+        // 边缘的撞击判断
+        if (birds.birdsX[0] + birds.birdsWidth[0] >= this.dataStore.canvas.width || birds.birdsX[0] <= 0) {
             this.isGameOver = true;
             return;
         }
@@ -78,7 +79,7 @@ export class Director {
             }
         }
         // 加分
-        if (birds.birdsX[0] > pencils[0].x + pencils[0].width && score.isScore) {
+        if (birds.birdsY[0] + birds.birdsHeight[0] < pencils[0].y && score.isScore) {
             wx.vibrateShort({
               success: function(){
 
@@ -94,12 +95,13 @@ export class Director {
         if (!this.isGameOver) {
             this.dataStore.get('background').draw();
             const pencils = this.dataStore.get('pencils');
-            if (pencils[0].x + pencils[0].width <= 0 && pencils.length === 4) {
+            const height = this.dataStore.canvas.height;
+            if (pencils[0].y >= height && pencils.length === 4) {
                 pencils.shift();
                 pencils.shift();
                 this.dataStore.get('score').isScore = true;
             }
-            if (pencils[0].x <= (DataStore.getInstance().canvas.width - pencils[0].width) / 2 && pencils.length === 2) {
+            if (pencils[0].y >= (height - pencils[0].height) / 2 && pencils.length === 2) {
                 this.createPencil();
             }
             this.dataStore.get('pencils').forEach(value => {

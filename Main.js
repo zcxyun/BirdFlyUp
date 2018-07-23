@@ -34,26 +34,27 @@ export class Main {
     }
 
     init() {
+        wx.offTouchStart();
         this.director.isGameOver = false;
         this.dataStore.put('background', BackGround)
-                        .put('land', Land)
-                        .put('pencils', [])
-                        .put('birds', Birds)
-                        .put('startButton', StartButton)
-                        .put('score', Score);
-        this.registerEvent();
+            .put('land', Land)
+            .put('pencils', [])
+            .put('birds', Birds)
+            .put('startButton', StartButton)
+            .put('score', Score);
         this.director.createPencil();
+        this.registerEvent();
         this.director.run();
     }
 
     registerEvent() {
-        wx.onTouchStart((e) => {
+        wx.onTouchStart(() => {
             if (this.director.isGameOver) {
                 console.log('游戏开始');
                 this.init();
             } else {
                 this.director.birdsEvent();
             }
-        })
+        });
     }
 }

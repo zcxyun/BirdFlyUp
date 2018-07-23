@@ -10,7 +10,7 @@
 	"compileType": "game",
 	"libVersion": "game",
 	"appid": "touristappid",
-	"projectname": "TestGame",
+	"projectname": "BirdFlyUp",
 	"isGameTourist": true,
 	"condition": {
 		"search": {

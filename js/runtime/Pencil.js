@@ -11,7 +11,7 @@ export class Pencil extends Sprite {
             image,
             0, 0,
             image.width, image.height,
-            DataStore.getInstance().canvas.width, 0,
+            0, 0,
             image.width, image.height
         );
         this.top = top;
@@ -19,7 +19,7 @@ export class Pencil extends Sprite {
     }
 
     draw() {
-        this.x = this.x - this.moveSpeed;
+        this.y = this.y + this.moveSpeed;
         super.draw(
             this.img,
             0, 0,

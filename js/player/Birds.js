@@ -24,18 +24,19 @@ export class Birds extends Sprite {
         this.clippingY = [10, 10, 10];
         this.clippingWidth = [34, 34, 34];
         this.clippingHeight = [24, 24, 24];
-        const birdX = DataStore.getInstance().canvas.width / 5;
+        const birdX = DataStore.getInstance().canvas.width / 2;
         this.birdsX = [birdX, birdX, birdX];
-        const birdY = DataStore.getInstance().canvas.height / 2;
+        const birdY = DataStore.getInstance().canvas.height - Sprite.getImage('land').height;
         this.birdsY = [birdY, birdY, birdY];
         const birdWidth = 34;
         this.birdsWidth = [birdWidth, birdWidth, birdWidth];
         const birdHeight = 24;
         this.birdsHeight = [birdHeight, birdHeight, birdHeight];
-        this.y = [birdY, birdY, birdY];
+        this.x = [birdX, birdX, birdX];
         this.index = 0;
         this.count = 0;
         this.time = 0;
+        this.changeDirection = false;
     }
 
     draw() {
@@ -50,15 +51,15 @@ export class Birds extends Sprite {
         this.index = Math.floor(this.count);
 
         // 模拟重力加速度
-        const g = 0.98 / 2;
-        // 向上移动一点偏移量
-        const offsetUp = 30;
+        const g = 0.98 / 10;
+        // 增加一点惯性
+        const offsetUp = 50;
         //小鸟的位移
-        const offsetY = (g * this.time * (this.time - offsetUp)) / 2;
+        let offsetX = (g * this.time * (this.time - offsetUp)) / 2;
+        let offsetXChange = this.changeDirection ? -offsetX : offsetX;
         for (let i = 0; i <= 2; i++) {
-            this.birdsY[i] = this.y[i] + offsetY;
+            this.birdsX[i] = this.x[i] + offsetXChange;
         }
-        // 时间自增
         this.time++;
         super.draw(
             this.img,

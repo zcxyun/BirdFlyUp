@@ -13,22 +13,22 @@ export class Land extends Sprite{
             image.width, image.height
         );
         // 地板的水平变化坐标
-        this.landX = 0;
+        this.landY = DataStore.getInstance().canvas.height - image.height;
         // 地板的水平移动速度
         this.landSpeed = 2;
     }
 
     draw() {
-        this.landX = this.landX + this.landSpeed;
-        if (this.landX >= (this.img.width - DataStore.getInstance().canvas.width)) {
+        this.landY = this.landY + this.landSpeed;
+        // if (this.landX >= (this.img.width - DataStore.getInstance().canvas.width)) {
 
-            this.landX = 0;
-        }
+        //     this.landX = 0;
+        // }
         super.draw(
             this.img,
             this.srcX, this.srcY,
             this.srcW, this.srcH,
-            -this.landX, this.y,
+            this.x, this.landY,
             this.width, this.height
         );
     }
