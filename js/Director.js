@@ -54,6 +54,7 @@ export class Director {
         const score = this.dataStore.get('score');
         // 边缘的撞击判断
         if (birds.birdsX[0] + birds.birdsWidth[0] >= this.dataStore.canvas.width || birds.birdsX[0] <= 0) {
+            this.dataStore.get('crashSound').play();
             birds.willCrash = true;
             birds.time = 0;
             return;
@@ -76,6 +77,7 @@ export class Director {
             };
             if (Director.isStrike(birdsBorder, pencilBorder)) {
                 console.log('撞到铅笔啦');
+                this.dataStore.get('crashSound').play();
                 birds.willCrash = true;
                 birds.time = 0;
                 return;
@@ -84,10 +86,11 @@ export class Director {
         // 加分
         if (birds.birdsY[0] + birds.birdsHeight[0] < pencils[0].y && score.isScore) {
             wx.vibrateShort({
-              success: function(){
+                success: function () {
 
-              }
+                }
             });
+            this.dataStore.get('pointSound').play();
             score.isScore = false;
             score.scoreNumber++;
         }
@@ -125,15 +128,20 @@ export class Director {
             this.dataStore.get('land').draw();
             this.dataStore.get('score').draw();
             this.dataStore.get('birds').draw();
+            if (!this.gameStart) {
+                this.dataStore.get('helpInfo').draw();
+            }
             let timer = requestAnimationFrame(() => {
                 this.run();
             });
             this.dataStore.put('timer', timer);
         } else {
-            // 播放撞击音效
-            this.dataStore.get('crashSound').play();
+            // 播放坠落音效
+            this.dataStore.get('dieSound').play();
             console.log('游戏结束');
+            this.dataStore.get('gameOver').draw();
             this.dataStore.get('startButton').draw();
+            // this.gameStart = false;
             cancelAnimationFrame(this.dataStore.timer);
 
             // let birds = this.dataStore.get('birds');

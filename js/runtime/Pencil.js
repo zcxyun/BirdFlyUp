@@ -1,5 +1,6 @@
 import { Sprite } from "../base/Sprite.js";
 import { DataStore } from "../base/DataStore.js";
+import { Director } from "../Director.js";
 
 /**
  * 铅笔基类
@@ -20,7 +21,7 @@ export class Pencil extends Sprite {
     }
 
     draw() {
-        if (!this.dataStore.get('birds').willCrash) {
+        if (Director.getInstance().gameStart && !this.dataStore.get('birds').willCrash) {
             this.y = this.y + this.moveSpeed;
         }
 

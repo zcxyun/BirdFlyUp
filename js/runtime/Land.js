@@ -1,5 +1,6 @@
 import { Sprite } from "../base/Sprite.js";
 import { DataStore } from "../base/DataStore.js";
+import { Director } from "../Director.js";
 
 // 路地类 (不断移动的路地)
 export class Land extends Sprite{
@@ -19,7 +20,9 @@ export class Land extends Sprite{
     }
 
     draw() {
-        this.landY = this.landY + this.landSpeed;
+        if (Director.getInstance().gameStart) {
+            this.landY = this.landY + this.landSpeed;
+        }
         // if (this.landX >= (this.img.width - DataStore.getInstance().canvas.width)) {
 
         //     this.landX = 0;

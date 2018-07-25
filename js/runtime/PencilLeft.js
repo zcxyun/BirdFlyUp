@@ -9,8 +9,4 @@ export class PencilLeft extends Pencil {
         super(image, left);
         this.x = this.left - this.img.width;
     }
-
-    draw() {
-        super.draw();
-    }
 }

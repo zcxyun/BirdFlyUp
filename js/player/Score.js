@@ -5,7 +5,6 @@ import { Sprite } from "../base/Sprite.js";
 export class Score extends Sprite {
     constructor() {
         let image = Sprite.getImage('zero');
-        let dataStore = DataStore.getInstance();
         super(
             image,
             0, 0,
@@ -13,8 +12,8 @@ export class Score extends Sprite {
             0, 0,
             image.width, image.height
         );
-        this.x = dataStore.canvas.width / 2;
-        this.y = dataStore.canvas.height / 18;
+        this.x = this.dataStore.canvas.width / 2;
+        this.y = this.dataStore.canvas.height / 18;
         this.scoreNumber = 0;
         // canvas 刷新很快， 判断是否能够加分
         this.isScore = true;

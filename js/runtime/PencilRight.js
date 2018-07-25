@@ -10,7 +10,4 @@ export class PencilRight extends Pencil{
         this.gap = DataStore.getInstance().canvas.width / 2;
         this.x = this.left + this.gap;
     }
-    draw(){
-        super.draw();
-    }
 }

@@ -50,7 +50,9 @@ export class Birds extends Sprite {
         if (this.willCrash) {
             this.birdsCrashDown();
         } else {
-            this.birdsMove();
+            if (Director.getInstance().gameStart) {
+                this.birdsMove();
+            }
         }
         super.draw(
             this.img,
@@ -90,7 +92,7 @@ export class Birds extends Sprite {
     }
     birdsCrashDown() {
         // 模拟重力加速度
-        const g = 0.98 / 5;
+        const g = 0.98 / 2;
         //小鸟的位移
         let offsetY = (g * this.time * this.time) / 2;
         for (let i = 0; i <= 2; i++) {
