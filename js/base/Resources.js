@@ -3,7 +3,8 @@ export const Resources = [
     ['land', 'res/land.png'],
     ['pencilLeft', 'res/pie_left.png'],
     ['pencilRight', 'res/pie_right.png'],
-    ['birds', 'res/birds.png'],
+    ['birdsToLeft', 'res/birds_to_left.png'],
+    ['birdsToRight', 'res/birds_to_right.png'],
     ['startButton', 'res/start_button.png']
 ];
 

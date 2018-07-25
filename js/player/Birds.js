@@ -4,7 +4,7 @@ import { DataStore } from "../base/DataStore.js";
 // 小鸟类
 export class Birds extends Sprite {
     constructor() {
-        let image = Sprite.getImage('birds');
+        let image = Sprite.getImage('birdsToRight');
         super(
             image,
             0, 0,
@@ -26,7 +26,7 @@ export class Birds extends Sprite {
         this.clippingHeight = [24, 24, 24];
         const birdX = DataStore.getInstance().canvas.width / 2;
         this.birdsX = [birdX, birdX, birdX];
-        const birdY = DataStore.getInstance().canvas.height - Sprite.getImage('land').height;
+        const birdY = DataStore.getInstance().canvas.height - Sprite.getImage('land').height - 24;
         this.birdsY = [birdY, birdY, birdY];
         const birdWidth = 34;
         this.birdsWidth = [birdWidth, birdWidth, birdWidth];
@@ -36,6 +36,7 @@ export class Birds extends Sprite {
         this.index = 0;
         this.count = 0;
         this.time = 0;
+        // 改变向上飞的方向
         this.changeDirection = false;
     }
 
@@ -53,10 +54,14 @@ export class Birds extends Sprite {
         // 模拟重力加速度
         const g = 0.98 / 10;
         // 增加一点惯性
-        const offsetUp = 50;
+        const offsetUp = 70;
         //小鸟的位移
         let offsetX = (g * this.time * (this.time - offsetUp)) / 2;
+        // 根据向上飞的方向改变位移的方向，并获取位移的距离
         let offsetXChange = this.changeDirection ? -offsetX : offsetX;
+        // 根据向上飞的方向改变小鸟的方向
+        this.img = this.changeDirection ? Sprite.getImage('birdsToLeft') : Sprite.getImage('birdsToRight');
+
         for (let i = 0; i <= 2; i++) {
             this.birdsX[i] = this.x[i] + offsetXChange;
         }

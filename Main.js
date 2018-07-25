@@ -25,11 +25,24 @@ export class Main {
         bgm.loop = true;
         bgm.src = 'audios/bgm.mp3';
     }
+    // 创建点击屏幕音效
+    createClickSoundEffect() {
+        this.clickSound = wx.createInnerAudioContext();
+        this.clickSound.src = 'audios/move.mp3';
+    }
+    // 创建撞击音效
+    createCrashSoundEffect() {
+        this.crashSound = wx.createInnerAudioContext();
+        this.crashSound.src = 'audios/crash.mp3';
+    }
     onResourceFirstLoaded(map) {
         this.dataStore.canvas = this.canvas;
         this.dataStore.ctx = this.ctx;
         this.dataStore.res = map;
         // this.createBackgroundMusic();
+        this.createClickSoundEffect();
+        this.createCrashSoundEffect();
+
         this.init();
     }
 
@@ -41,7 +54,8 @@ export class Main {
             .put('pencils', [])
             .put('birds', Birds)
             .put('startButton', StartButton)
-            .put('score', Score);
+            .put('score', Score)
+            .put('crashSound', this.crashSound);
         this.director.createPencil();
         this.registerEvent();
         this.director.run();
@@ -49,6 +63,7 @@ export class Main {
 
     registerEvent() {
         wx.onTouchStart(() => {
+            this.clickSound.play();
             if (this.director.isGameOver) {
                 console.log('游戏开始');
                 this.init();

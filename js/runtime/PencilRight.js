@@ -7,10 +7,18 @@ export class PencilRight extends Pencil{
     constructor(top) {
         let image = Sprite.getImage('pencilRight');
         super(image, top);
+        this.gap = DataStore.getInstance().canvas.width / 4;
+        this.x = this.top + this.gap;
     }
     draw(){
-        let gap = DataStore.getInstance().canvas.width / 3;
-        this.x = this.top + gap;
+        const canvasWidth = DataStore.getInstance().canvas.width;
+        if (this.x >= canvasWidth / 1.5 + this.gap) {
+            this.offset = -0.5;
+        }
+        if (this.x <= canvasWidth / 6 + this.gap) {
+            this.offset = 0.5;
+        }
+        this.x = this.x + this.offset;
         super.draw();
     }
 }

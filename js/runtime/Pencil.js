@@ -16,10 +16,12 @@ export class Pencil extends Sprite {
         );
         this.top = top;
         this.moveSpeed = 2;
+        this.offset = 0.5;
     }
 
     draw() {
         this.y = this.y + this.moveSpeed;
+
         super.draw(
             this.img,
             0, 0,

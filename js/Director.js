@@ -31,6 +31,7 @@ export class Director {
         }
         birds.time = 0;
         birds.changeDirection = !birds.changeDirection;
+
     }
 
     // 判断小鸟是否和铅笔撞击
@@ -115,6 +116,8 @@ export class Director {
             });
             this.dataStore.put('timer', timer);
         } else {
+            // 播放撞击音效
+            this.dataStore.get('crashSound').play();
             console.log('游戏结束');
             this.dataStore.get('startButton').draw();
             cancelAnimationFrame(this.dataStore.timer);

@@ -9,10 +9,10 @@ export class Score {
         this.isScore = true;
     }
     draw() {
-        this.ctx.font = '25px Arial';
-        this.ctx.fillStyle = '#ffcbeb';
-        this.ctx.fillText(this.scoreNumber,
+        this.ctx.font = '40px Arial';
+        this.ctx.strokeText(this.scoreNumber,
             DataStore.getInstance().canvas.width / 2,
-            DataStore.getInstance().canvas.height / 18, 1000);
+            DataStore.getInstance().canvas.height / 15, 1000);
+        this.ctx.fillStyle = '#fff';
     }
 }
