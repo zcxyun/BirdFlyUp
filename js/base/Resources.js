@@ -5,6 +5,16 @@ export const Resources = [
     ['pencilRight', 'res/pie_right.png'],
     ['birdsToLeft', 'res/birds_to_left.png'],
     ['birdsToRight', 'res/birds_to_right.png'],
-    ['startButton', 'res/start_button.png']
+    ['startButton', 'res/start_button.png'],
+    ['zero', 'res/0.png'],
+    ['one', 'res/1.png'],
+    ['two', 'res/2.png'],
+    ['three', 'res/3.png'],
+    ['four', 'res/4.png'],
+    ['five', 'res/5.png'],
+    ['six', 'res/6.png'],
+    ['seven', 'res/7.png'],
+    ['eight', 'res/8.png'],
+    ['nine', 'res/9.png'],
 ];
 

@@ -6,7 +6,7 @@ import { DataStore } from "../base/DataStore.js";
  */
 
 export class Pencil extends Sprite {
-    constructor(image, top) {
+    constructor(image, left) {
         super(
             image,
             0, 0,
@@ -14,13 +14,15 @@ export class Pencil extends Sprite {
             0, 0,
             image.width, image.height
         );
-        this.top = top;
+        this.left = left;
         this.moveSpeed = 2;
-        this.offset = 0.5;
+        this.dataStore = DataStore.getInstance();
     }
 
     draw() {
-        this.y = this.y + this.moveSpeed;
+        if (!this.dataStore.get('birds').willCrash) {
+            this.y = this.y + this.moveSpeed;
+        }
 
         super.draw(
             this.img,

@@ -68,7 +68,9 @@ export class Main {
                 console.log('游戏开始');
                 this.init();
             } else {
-                this.director.birdsEvent();
+                if (!this.dataStore.get('birds').willCrash) {
+                    this.director.birdsEvent();
+                }
             }
         });
     }

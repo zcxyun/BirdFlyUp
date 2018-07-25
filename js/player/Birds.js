@@ -1,5 +1,6 @@
 import { Sprite } from "../base/Sprite.js";
 import { DataStore } from "../base/DataStore.js";
+import { Director } from "../Director.js";
 
 // 小鸟类
 export class Birds extends Sprite {
@@ -33,14 +34,33 @@ export class Birds extends Sprite {
         const birdHeight = 24;
         this.birdsHeight = [birdHeight, birdHeight, birdHeight];
         this.x = [birdX, birdX, birdX];
+        this.y = [birdY, birdY, birdY];
         this.index = 0;
         this.count = 0;
         this.time = 0;
         // 改变向上飞的方向
         this.changeDirection = false;
+        // 小鸟是否将要下坠
+        this.willCrash = false;
     }
 
     draw() {
+
+        this.toggleBird();
+        if (this.willCrash) {
+            this.birdsCrashDown();
+        } else {
+            this.birdsMove();
+        }
+        super.draw(
+            this.img,
+            this.clippingX[this.index], this.clippingY[this.index],
+            this.clippingWidth[this.index], this.clippingHeight[this.index],
+            this.birdsX[this.index], this.birdsY[this.index],
+            this.birdsWidth[this.index], this.birdsHeight[this.index]
+        );
+    }
+    toggleBird() {
         // 切换三只小鸟的速度
         const speed = 0.1;
         this.count = this.count + speed;
@@ -50,7 +70,8 @@ export class Birds extends Sprite {
         }
         // 减速器的作用
         this.index = Math.floor(this.count);
-
+    }
+    birdsMove() {
         // 模拟重力加速度
         const g = 0.98 / 10;
         // 增加一点惯性
@@ -66,12 +87,15 @@ export class Birds extends Sprite {
             this.birdsX[i] = this.x[i] + offsetXChange;
         }
         this.time++;
-        super.draw(
-            this.img,
-            this.clippingX[this.index], this.clippingY[this.index],
-            this.clippingWidth[this.index], this.clippingHeight[this.index],
-            this.birdsX[this.index], this.birdsY[this.index],
-            this.birdsWidth[this.index], this.birdsHeight[this.index]
-        );
+    }
+    birdsCrashDown() {
+        // 模拟重力加速度
+        const g = 0.98 / 5;
+        //小鸟的位移
+        let offsetY = (g * this.time * this.time) / 2;
+        for (let i = 0; i <= 2; i++) {
+            this.birdsY[i] = this.y[i] + offsetY;
+        }
+        this.time++;
     }
 }

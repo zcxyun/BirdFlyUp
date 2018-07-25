@@ -1,18 +1,47 @@
 import { DataStore } from "../base/DataStore.js";
+import { Sprite } from "../base/Sprite.js";
 
 // 计分器类
-export class Score {
+export class Score extends Sprite {
     constructor() {
-        this.ctx = DataStore.getInstance().ctx;
+        let image = Sprite.getImage('zero');
+        let dataStore = DataStore.getInstance();
+        super(
+            image,
+            0, 0,
+            image.width, image.height,
+            0, 0,
+            image.width, image.height
+        );
+        this.x = dataStore.canvas.width / 2;
+        this.y = dataStore.canvas.height / 18;
         this.scoreNumber = 0;
         // canvas 刷新很快， 判断是否能够加分
         this.isScore = true;
     }
     draw() {
-        this.ctx.font = '40px Arial';
-        this.ctx.strokeText(this.scoreNumber,
-            DataStore.getInstance().canvas.width / 2,
-            DataStore.getInstance().canvas.height / 15, 1000);
-        this.ctx.fillStyle = '#fff';
+        let imageArr = this.numToPic(this.scoreNumber);
+        for (let i = 0; i < imageArr.length; i++) {
+            // 数字图片居中
+            let x = this.x - imageArr.length * this.img.width / 2;
+            super.draw(
+                imageArr[i],
+                this.srcX, this.srcY,
+                this.srcW, this.srcH,
+                x + i * this.img.width, this.y,
+                this.width, this.height
+            );
+        }
+
+    }
+    // 数字转数字图片
+    numToPic(num) {
+        const numPicArr = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+        let strNums = num.toString().split('');
+        let imageArr = [];
+        for (let value of strNums) {
+            imageArr.push(Sprite.getImage(numPicArr[Number(value)]));
+        }
+        return imageArr;
     }
 }
