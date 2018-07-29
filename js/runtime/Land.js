@@ -2,7 +2,9 @@ import { Sprite } from "../base/Sprite.js";
 import { DataStore } from "../base/DataStore.js";
 import { Director } from "../Director.js";
 
-// 路地类 (不断移动的路地)
+/**
+ *  路地图片类 (不断移动的路地)
+ */
 export class Land extends Sprite{
     constructor() {
         let image = Sprite.getImage('land');

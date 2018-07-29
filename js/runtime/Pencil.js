@@ -5,7 +5,6 @@ import { Director } from "../Director.js";
 /**
  * 铅笔基类
  */
-
 export class Pencil extends Sprite {
     constructor(image, left) {
         super(
@@ -19,12 +18,10 @@ export class Pencil extends Sprite {
         this.moveSpeed = 2;
         this.dataStore = DataStore.getInstance();
     }
-
     draw() {
         if (Director.getInstance().gameStart && !this.dataStore.get('birds').willCrash) {
             this.y = this.y + this.moveSpeed;
         }
-
         super.draw(
             this.img,
             0, 0,

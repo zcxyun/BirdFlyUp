@@ -1,6 +1,8 @@
 import { DataStore } from "./DataStore.js";
 
-// 精灵的基类，负责初始化精灵加载的资源的大小和位置
+/**
+ * 精灵的基类，负责初始化精灵加载的资源的大小和位置
+ */
 export class Sprite {
     constructor(
         img = null,
@@ -33,7 +35,10 @@ export class Sprite {
             img, srcX, srcY, srcW, srcH, x, y, width, height
         );
     }
-
+    /**
+     * 精灵静态类根据 key 获得相应的图片image对象
+     * @param {string}} key
+     */
     static getImage(key) {
         return DataStore.getInstance().res.get(key);
     }

@@ -1,8 +1,11 @@
 import { DataStore } from "./base/DataStore.js";
 import { PencilLeft } from "./runtime/PencilLeft.js";
 import { PencilRight } from "./runtime/PencilRight.js";
+import { Sprite } from "./base/Sprite.js";
 
-// 导演类 (控制游戏的逻辑)
+/**
+ * 导演类 (控制游戏的逻辑)
+ */
 export class Director {
     constructor() {
         this.dataStore = DataStore.getInstance();
@@ -14,7 +17,9 @@ export class Director {
         }
         return Director.instance;
     }
-
+    /**
+     * 创建管道
+     */
     createPencil() {
         const minLeft = DataStore.getInstance().canvas.width / 10;
         const maxLeft = DataStore.getInstance().canvas.width / 2;
@@ -22,8 +27,9 @@ export class Director {
         this.dataStore.get('pencils').push(new PencilLeft(left));
         this.dataStore.get('pencils').push(new PencilRight(left));
     }
-
-    // 屏幕点击事件
+    /**
+     * 小鸟左右移动
+     */
     birdsEvent() {
         let birds = this.dataStore.get('birds');
         for (let i = 0; i <= 2; i++) {
@@ -34,7 +40,9 @@ export class Director {
 
     }
 
-    // 判断小鸟是否和铅笔撞击
+    /**
+     * 判断小鸟是否和铅笔撞击
+     */
     static isStrike(bird, pencil) {
         let s = true;
         // 返逻辑， 判断不撞的情况
@@ -47,7 +55,9 @@ export class Director {
         }
         return s;
     }
-    // 判断小鸟是否撞击地面和铅笔
+    /**
+     * 判断小鸟是否撞击地面和铅笔
+     */
     check() {
         const birds = this.dataStore.get('birds');
         const pencils = this.dataStore.get('pencils');
@@ -56,6 +66,7 @@ export class Director {
         if (birds.birdsX[0] + birds.birdsWidth[0] >= this.dataStore.canvas.width || birds.birdsX[0] <= 0) {
             this.dataStore.get('crashSound').play();
             birds.willCrash = true;
+            this.gameStart = false;
             birds.time = 0;
             return;
         }
@@ -75,10 +86,12 @@ export class Director {
                 left: pencil.x,
                 right: pencil.x + pencil.width
             };
+            // 管道的撞击判断
             if (Director.isStrike(birdsBorder, pencilBorder)) {
                 console.log('撞到铅笔啦');
                 this.dataStore.get('crashSound').play();
                 birds.willCrash = true;
+                this.gameStart = false;
                 birds.time = 0;
                 return;
             }
@@ -93,9 +106,15 @@ export class Director {
             this.dataStore.get('pointSound').play();
             score.isScore = false;
             score.scoreNumber++;
+            if (wx.getStorageSync('scoreSum') < score.scoreNumber) {
+                score.hasNewScore = true;
+                wx.setStorageSync('scoreSum', score.scoreNumber);
+            }
         }
     }
-
+    /**
+     * 从对象池获得管道数组，并按一定条件使其按队列形式从数组中删除和添加，最后依次画出数组中的管道
+     */
     togglePencils() {
         const pencils = this.dataStore.get('pencils');
         const height = this.dataStore.canvas.height;
@@ -111,49 +130,65 @@ export class Director {
             value.draw();
         });
     }
-
+    /**
+     * 游戏运行时
+     */
     run() {
         // 碰撞检测
         let birds = this.dataStore.get('birds');
-        if (!birds.willCrash) {
-
+        // 判断小鸟是否将要下坠，如果不就检测碰撞
+        if (!birds.willCrash && !this.isGameOver) {
             this.check();
         }
-        if (birds.birdsY[0] > this.dataStore.canvas.height) {
+        // 如果小鸟下坠的 y 坐标大于屏幕画布的高度，游戏结束并显示游戏结束画面
+        if (birds.birdsY[0] > this.dataStore.canvas.height && birds.willCrash) {
             this.isGameOver = true;
-        }
-        if (!this.isGameOver) {
-            this.dataStore.get('background').draw();
-            this.togglePencils();
-            this.dataStore.get('land').draw();
-            this.dataStore.get('score').draw();
-            this.dataStore.get('birds').draw();
-            if (!this.gameStart) {
-                this.dataStore.get('helpInfo').draw();
-            }
-            let timer = requestAnimationFrame(() => {
-                this.run();
-            });
-            this.dataStore.put('timer', timer);
-        } else {
             // 播放坠落音效
             this.dataStore.get('dieSound').play();
-            console.log('游戏结束');
-            this.dataStore.get('gameOver').draw();
-            this.dataStore.get('startButton').draw();
-            // this.gameStart = false;
-            cancelAnimationFrame(this.dataStore.timer);
-
-            // let birds = this.dataStore.get('birds');
-            // let timerBirds = requestAnimationFrame(() => {
-            //     birds.draw()
-            // });
-            // if (birds.birdsY[0] > this.dataStore.canvas.height) {
-            //     cancelAnimationFrame(timerBirds);
-            // }
-            this.dataStore.destroy();
-            // 触发微信小游戏垃圾回收
-            wx.triggerGC();
         }
+        // 如果isGameOver!==true，游戏没有结束，继续游戏循环动画，否则游戏结束，退出循环
+        if (!this.isGameOver) {
+            this.dataStore.get('background').draw();
+            // 游戏首页场景要显示的图片
+            if (this.gameHome) {
+                this.dataStore.get('title').draw();
+                this.dataStore.get('startButton').draw();
+                this.dataStore.get('rank').draw();
+                this.dataStore.get('share').draw();
+                // 游戏准备页面场景要显示图片
+            } else if (this.gameReady) {
+                this.dataStore.get('helpInfo').draw();
+                this.dataStore.get('ready').draw();
+            }
+            // 游戏准备页面场景或游戏开始运行页面的图片
+            if (this.gameReady || this.gameStart) {
+                this.togglePencils();
+                this.dataStore.get('score').draw();
+            }
+            this.dataStore.get('land').draw();
+            this.dataStore.get('birds').draw();
+            // 游戏结束要显示的图片
+        } else {
+            birds.willCrash = false;
+            this.dataStore.get('background').draw();
+            const score = this.dataStore.get('score');
+            this.dataStore.get('gameOver').draw();
+            this.dataStore.get('message').draw();
+            this.dataStore.get('medal').draw();
+            score.draw();
+            // 判断是否有新的记录，如果有就显示 new
+            if (score.hasNewScore) {
+                this.dataStore.get('newScore').draw();
+            }
+            this.dataStore.get('startButton').draw();
+            this.dataStore.get('rank').draw();
+            this.dataStore.get('share').draw();
+        }
+        // 游戏开始循环运行（在下次进行重绘时执行。）
+        let timer = requestAnimationFrame(() => {
+            this.run();
+        });
+        // 将游戏循环运行请求ID存入对象池
+        this.dataStore.put('timer', timer);
     }
 }

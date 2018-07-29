@@ -1,7 +1,9 @@
 import { Sprite } from "../base/Sprite.js";
 import { DataStore } from "../base/DataStore.js";
 
-// 背景类
+/**
+ * 背景图片类
+ */
 export class BackGround extends Sprite{
     constructor() {
         const image = Sprite.getImage('background');
