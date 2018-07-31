@@ -105,10 +105,24 @@ export class Director {
             });
             this.dataStore.get('pointSound').play();
             score.isScore = false;
-            score.scoreNumber++;
+            score.scoreNumber += 2;
             if (wx.getStorageSync('scoreSum') < score.scoreNumber) {
                 score.hasNewScore = true;
                 wx.setStorageSync('scoreSum', score.scoreNumber);
+                wx.setUserCloudStorage({
+                    KVDataList: [{key: 'score', value: score.scoreNumber.toString()}],
+                    success: (res) => {
+                        console.log(res + '存往云端');
+                        // 让子域更新当前用户的最高分，因为主域无法得到getUserCloadStorage;
+                        let openDataContext = wx.getOpenDataContext();
+                        openDataContext.postMessage({
+                            type: 'updateMaxScore',
+                        });
+                    },
+                    fail: (res) => {
+                        console.log(res);
+                    }
+                });
             }
         }
     }
@@ -131,6 +145,18 @@ export class Director {
         });
     }
     /**
+     * 显示排行榜
+     */
+    showRankInfo() {
+        if (this.showRank) {
+            this.dataStore.ctx.drawImage(this.dataStore.sharedCanvas, 0, 0, this.dataStore.canvas.width, this.dataStore.canvas.height);
+        }
+        if (this.dataStore.shareTicket && !this.showGroupRank) {
+            this.showGroupRank = true;
+            this.messageSharecanvas('group', this.dataStore.shareTicket);
+        }
+    }
+    /**
      * 游戏运行时
      */
     run() {
@@ -149,12 +175,15 @@ export class Director {
         // 如果isGameOver!==true，游戏没有结束，继续游戏循环动画，否则游戏结束，退出循环
         if (!this.isGameOver) {
             this.dataStore.get('background').draw();
+            this.dataStore.get('land').draw();
+            this.dataStore.get('birds').draw();
             // 游戏首页场景要显示的图片
             if (this.gameHome) {
                 this.dataStore.get('title').draw();
                 this.dataStore.get('startButton').draw();
                 this.dataStore.get('rank').draw();
                 this.dataStore.get('share').draw();
+                this.showRankInfo();
                 // 游戏准备页面场景要显示图片
             } else if (this.gameReady) {
                 this.dataStore.get('helpInfo').draw();
@@ -165,8 +194,6 @@ export class Director {
                 this.togglePencils();
                 this.dataStore.get('score').draw();
             }
-            this.dataStore.get('land').draw();
-            this.dataStore.get('birds').draw();
             // 游戏结束要显示的图片
         } else {
             birds.willCrash = false;
@@ -183,6 +210,7 @@ export class Director {
             this.dataStore.get('startButton').draw();
             this.dataStore.get('rank').draw();
             this.dataStore.get('share').draw();
+            this.showRankInfo();
         }
         // 游戏开始循环运行（在下次进行重绘时执行。）
         let timer = requestAnimationFrame(() => {

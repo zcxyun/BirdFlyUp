@@ -10,6 +10,7 @@ export const Resources = [
     ['start', 'res/start.png'],
     ['rank', 'res/rank.png'],
     ['share', 'res/share.png'],
+    ['return', 'res/return.png'],
     ['new', 'res/new.png'],
     ['medal0', 'res/medal_0.png'],
     ['medal1', 'res/medal_1.png'],

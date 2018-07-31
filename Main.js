@@ -15,6 +15,10 @@ import { Rank } from './js/player/Rank.js';
 import { NewScore } from './js/player/NewScore.js';
 import { Ready } from './js/player/Ready.js';
 import { Share } from './js/player/Share.js';
+import { CloseRank } from './js/player/CloseRank.js';
+// const screenWidth = window.innerWidth;
+// const screenHeight = window.innerHeight;
+// const ratio = wx.getSystemInfoSync().pixelRatio;
 
 /**
  * 初始化整个游戏的精灵，作为游戏开始的入口
@@ -22,7 +26,20 @@ import { Share } from './js/player/Share.js';
 export class Main {
     constructor() {
         this.canvas = wx.createCanvas();
+        // this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
+
+        // 解决图片模糊问题
+        // this.canvas.width = screenWidth * ratio;
+        // this.canvas.height = screenHeight * ratio;
+        // this.ctx.scale(ratio, ratio);
+
+        let openDataContext = wx.getOpenDataContext();
+        let sharedCanvas = openDataContext.canvas;
+        // sharedCanvas.width = screenWidth * ratio;
+        // sharedCanvas.height = screenHeight * ratio;
+        DataStore.getInstance().sharedCanvas = sharedCanvas;
+
         this.dataStore = DataStore.getInstance();
         this.director = Director.getInstance();
         const loader = ResourceLoader.create();
@@ -113,6 +130,8 @@ export class Main {
         }
         this.director.isGameOver = false;
         this.director.gameStart = false;
+        this.director.showRank = false;
+        this.director.showGroupRank = false;
         //
         this.dataStore.put('background', BackGround)
             .put('land', Land)
@@ -128,6 +147,7 @@ export class Main {
             .put('newScore', NewScore)
             .put('startButton', StartButton)
             .put('rank', Rank)
+            .put('closeRank', CloseRank)
             .put('share', Share)
             .put('crashSound', this.crashSound)
             .put('dieSound', this.dieSound)
@@ -156,27 +176,24 @@ export class Main {
             const touchY = res.touches[0].clientY;
             const startButton = this.dataStore.get('startButton');
             const share = this.dataStore.get('share');
+            const rank = this.dataStore.get('rank');
+            const closeRank = this.dataStore.get('closeRank');
             // 判断是否已经进入主页，如果是点击屏幕后就进入游戏准备页
             if (this.director.gameHome === true) {
+                // 点击开始按钮
                 if (this.checkClickArea(
                     touchX, touchY,
                     startButton.x, startButton.y,
                     startButton.width, startButton.height
-                )) {
+                ) && (!this.director.showRank || !this.director.showGroupRank)) {
                     console.log('游戏准备');
                     this.director.gameHome = false;
                     this.director.gameReady = true;
                     this.swooshSound.play();
                 }
-                // 点击分享按钮
-                if (this.checkClickArea(
-                    touchX, touchY,
-                    share.x, share.y,
-                    share.width, share.height
-                )) {
-                    this.swooshSound.play();
-                    this.forward('FlappyBirdUp');
-                }
+                this.clickForwardButton(touchX, touchY, share);
+                this.clickRankButton(touchX, touchY, rank);
+                this.closeRankButton(touchX, touchY, closeRank);
             }
             // 判断是否已经进入游戏准备页面，如果是点击屏幕后开始游戏
             else if (this.director.gameReady === true) {
@@ -197,7 +214,7 @@ export class Main {
                     touchX, touchY,
                     startButton.x, startButton.y,
                     startButton.width, startButton.height
-                )) {
+                ) && (!this.director.showRank || !this.director.showGroupRank)) {
                     console.log('游戏准备');
                     this.swooshSound.play();
                     // 取消一个先前通过调用 requestAnimationFrame 方法添加到计划中的动画帧请求
@@ -207,16 +224,59 @@ export class Main {
                     wx.triggerGC();
                     this.init();
                 }
-                // 点击分享按钮
-                if (this.checkClickArea(
-                    touchX, touchY,
-                    share.x, share.y,
-                    share.width, share.height
-                )) {
-                    this.swooshSound.play();
-                    this.forward('FlappyBirdUp');
-                }
+                this.clickForwardButton(touchX, touchY, share);
+                this.clickRankButton(touchX, touchY, rank);
+                this.closeRankButton(touchX, touchY, closeRank);
             }
+        });
+    }
+    /**
+     * 点击分享按钮
+     */
+    clickForwardButton(touchX, touchY, share) {
+        if (this.checkClickArea(
+            touchX, touchY,
+            share.x, share.y,
+            share.width, share.height
+        )) {
+            this.swooshSound.play();
+            this.forward('FlappyBirdUp');
+        }
+    }
+    /**
+     * 点击排行榜按钮
+     */
+    clickRankButton(touchX, touchY, rank) {
+        if (this.checkClickArea(
+            touchX, touchY,
+            rank.x, rank.y,
+            rank.width, rank.height
+        )) {
+            this.swooshSound.play();
+            this.messageSharecanvas();
+            this.director.showRank = true;
+        }
+    }
+    /**
+     * 点击关闭排行榜按钮
+     */
+    closeRankButton(touchX, touchY, closeRank) {
+        if (this.checkClickArea(
+            touchX, touchY,
+            closeRank.x, closeRank.y,
+            closeRank.width, closeRank.height
+        )) {
+            this.swooshSound.play();
+            this.director.showRank = false;
+        }
+    }
+
+    messageSharecanvas(type, text) {
+        // 排行榜也应该是实时的，所以需要sharedCanvas 绘制新的排行榜
+        let openDataContext = wx.getOpenDataContext();
+        openDataContext.postMessage({
+            type: type || 'friends',
+            text: text,
         });
     }
     /**
