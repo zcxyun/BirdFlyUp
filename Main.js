@@ -16,9 +16,7 @@ import { NewScore } from './js/player/NewScore.js';
 import { Ready } from './js/player/Ready.js';
 import { Share } from './js/player/Share.js';
 import { CloseRank } from './js/player/CloseRank.js';
-// const screenWidth = window.innerWidth;
-// const screenHeight = window.innerHeight;
-// const ratio = wx.getSystemInfoSync().pixelRatio;
+const ratio = wx.getSystemInfoSync().pixelRatio;
 
 /**
  * 初始化整个游戏的精灵，作为游戏开始的入口
@@ -29,6 +27,9 @@ export class Main {
         // this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
 
+        const screenWidth = this.canvas.width;
+        const screenHeight = this.canvas.height;
+
         // 解决图片模糊问题
         // this.canvas.width = screenWidth * ratio;
         // this.canvas.height = screenHeight * ratio;
@@ -36,8 +37,8 @@ export class Main {
 
         let openDataContext = wx.getOpenDataContext();
         let sharedCanvas = openDataContext.canvas;
-        // sharedCanvas.width = screenWidth * ratio;
-        // sharedCanvas.height = screenHeight * ratio;
+        sharedCanvas.width = screenWidth * ratio;
+        sharedCanvas.height = screenHeight * ratio;
         DataStore.getInstance().sharedCanvas = sharedCanvas;
 
         this.dataStore = DataStore.getInstance();
@@ -114,6 +115,12 @@ export class Main {
         });
         // 注册游戏第一次加载时所有的事件
         this.registerEvent();
+        wx.removeUserCloudStorage({
+            keyList: ['score', 'maxScore'],
+            success: () => {
+                console.log('清空云端数据');
+            }
+        });
         this.init();
     }
     /**
@@ -160,6 +167,40 @@ export class Main {
      * 游戏第一次加载时注册所有事件
      */
     registerEvent() {
+        // wx.onShow(() => {
+        //     wx.getUserCloudStorage({
+        //         keyList: ['maxScore'],
+        //         success: (resData) => {
+        //             let maxScore = res.KVDataList[0].value || 0;
+        //             wx.setStorageSync('maxScore', parseInt(maxScore));
+        //             console.log('首次启动从云端取出最大分数并存入本地缓存，最大值是：' + maxScore);
+        //             // wx.setUserCloudStorage({
+        //             //     KVDataList: [{key: 'score', value: maxScore}],
+        //             //     success: (res) => {
+        //             //         console.log('首次启动读取缓存中的最大分数并存入云端: ' + res);
+        //             //     },
+        //             //     fail: (res) => {
+        //             //         console.log('首次启动读取缓存中的最大分数并存入云端失败: ' + res);
+        //             //     }
+        //             // });
+        //         },
+        //         fail: (resData) => {
+        //             console.log('首次启动从云端取出最大分数并存入本地缓存失败：' + res);
+        //         }
+        //     });
+        // });
+        // wx.onHide((res) => {
+        //     wx.setUserCloudStorage({
+        //         KVDataList: [{ key: maxScore, value: wx.getStorageSync('maxScore') }],
+        //         success: (resData) => {
+        //             this.messageSharecanvas();
+        //             console.log('小游戏回到后台时更新云端用户最大分数，并通知开放数据域重绘sharedCanvas');
+        //         },
+        //         fail: (resData) => {
+        //             console.log('小游戏回到后台时更新云端用户最大分数失败');
+        //         }
+        //     });
+        // });
         wx.showShareMenu({ withShareTicket: true });
         wx.onShareAppMessage(() => {
             // 用户点击了“转发”按钮
@@ -253,7 +294,14 @@ export class Main {
             rank.width, rank.height
         )) {
             this.swooshSound.play();
-            this.messageSharecanvas();
+            // wx.setUserCloudStorage({
+            //     KVDataList: [{ key: maxScore, value: wx.getStorageSync('maxScore') }],
+            //     success: (res) => {
+            //         this.messageSharecanvas();
+            //         console.log('点击排行榜按钮后更新云端用户最大分数，并通知开放数据域重绘sharedCanvas');
+            //     }
+            // });
+            this.director.messageSharecanvas();
             this.director.showRank = true;
         }
     }
@@ -271,14 +319,7 @@ export class Main {
         }
     }
 
-    messageSharecanvas(type, text) {
-        // 排行榜也应该是实时的，所以需要sharedCanvas 绘制新的排行榜
-        let openDataContext = wx.getOpenDataContext();
-        openDataContext.postMessage({
-            type: type || 'friends',
-            text: text,
-        });
-    }
+
     /**
      * 检查屏幕点击区域是否在按钮区域内
      */

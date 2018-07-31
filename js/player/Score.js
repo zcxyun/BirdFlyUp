@@ -35,7 +35,7 @@ export class Score extends Sprite {
             );
             // 游戏结束计分板上显示最高得分信息
             this.drawScore(
-                wx.getStorageSync('scoreSum') || 0,
+                wx.getStorageSync('maxScore') || 0,
                 (this.dataStore.canvas.width - this.width) / 2 + 100,
                 (this.dataStore.canvas.height - this.height) / 2 + 40,
                 this.width / 1.5, this.height / 1.6,

@@ -106,25 +106,27 @@ export class Director {
             this.dataStore.get('pointSound').play();
             score.isScore = false;
             score.scoreNumber += 2;
-            if (wx.getStorageSync('scoreSum') < score.scoreNumber) {
+            if (wx.getStorageSync('maxScore') < score.scoreNumber) {
                 score.hasNewScore = true;
-                wx.setStorageSync('scoreSum', score.scoreNumber);
+                wx.setStorageSync('maxScore', score.scoreNumber);
+
                 wx.setUserCloudStorage({
                     KVDataList: [{key: 'score', value: score.scoreNumber.toString()}],
                     success: (res) => {
-                        console.log(res + '存往云端');
-                        // 让子域更新当前用户的最高分，因为主域无法得到getUserCloadStorage;
-                        let openDataContext = wx.getOpenDataContext();
-                        openDataContext.postMessage({
-                            type: 'updateMaxScore',
-                        });
-                    },
-                    fail: (res) => {
-                        console.log(res);
+                        console.log('更新云端最大分数：' + score.scoreNumber);
+                        this.messageSharecanvas('updateMaxScore');
                     }
                 });
             }
         }
+    }
+    messageSharecanvas(type, text) {
+        // 排行榜也应该是实时的，所以需要sharedCanvas 绘制新的排行榜
+        let openDataContext = wx.getOpenDataContext();
+        openDataContext.postMessage({
+            type: type || 'friends',
+            text: text,
+        });
     }
     /**
      * 从对象池获得管道数组，并按一定条件使其按队列形式从数组中删除和添加，最后依次画出数组中的管道
@@ -148,8 +150,10 @@ export class Director {
      * 显示排行榜
      */
     showRankInfo() {
+        const screenWidth = this.dataStore.canvas.width;
+        const screenHeight = this.dataStore.canvas.height;
         if (this.showRank) {
-            this.dataStore.ctx.drawImage(this.dataStore.sharedCanvas, 0, 0, this.dataStore.canvas.width, this.dataStore.canvas.height);
+            this.dataStore.ctx.drawImage(this.dataStore.sharedCanvas, 0, 0, screenWidth, screenHeight);
         }
         if (this.dataStore.shareTicket && !this.showGroupRank) {
             this.showGroupRank = true;

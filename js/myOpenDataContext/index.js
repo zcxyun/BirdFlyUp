@@ -19,7 +19,7 @@ getUserInfo();
 // 初始化标题返回按钮等元素
 function initEle() {
     context.restore();
-    // context.scale(ratio, ratio);
+    context.scale(ratio, ratio);
     context.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
 
     // 画背景
@@ -44,7 +44,7 @@ function initEle() {
     context.fillStyle = '#8D8D8D';
     context.font = '20px Arial';
     context.textAlign = 'left';
-    context.fillText('每周一凌晨刷新', 100, 330);
+    context.fillText('历史最高分', 100, 330);
 
     // 自己排名外框
     context.fillStyle = '#302F30';
@@ -109,6 +109,8 @@ function initRanklist(list) {
 // 绘制自己的排名
 function drawMyRank() {
     if (myInfo.avatarUrl && myScore) {
+        context.fillStyle = '#302F30';
+        context.fillRect(80, 960, 750 - 80 * 2, 120);
         let avatar = wx.createImage();
         avatar.src = myInfo.avatarUrl;
         avatar.onload = function () {
@@ -152,7 +154,9 @@ function sortByScore(data) {
 
     })
     array.sort((a, b) => {
-        return a['score'] < b['score'];
+        let scoreA = parseInt(a['score']);
+        let scoreB = parseInt(b['score']);
+        return scoreA < scoreB ? 1 : (scoreA > scoreB ? -1 : 0);
     });
     myRank = array.findIndex((item) => {
         return item.nickname === myInfo.nickName && item.avatarUrl === myInfo.avatarUrl;
@@ -182,12 +186,14 @@ function getMyScore() {
         keyList: ['score', 'maxScore'],
         success: res => {
             let data = res;
-            console.log('获取自己的分数' + data.KVDataList[0].value);
-            let lastScore = data.KVDataList[0].value || 0;
+            // console.log('获取自己的分数' + (data.KVDataList[0].value || 0));
+            // console.log('获取自己的分数' + data.KVDataList[0].value, data.KVDataList[1].value);
+            let lastScore = data.KVDataList[0] && data.KVDataList[0].value ? data.KVDataList[0].value : 0;
             if (!data.KVDataList[1]) {
                 saveMaxScore(lastScore);
                 myScore = lastScore;
-            } else if (lastScore > data.KVDataList[1].value) {
+            } else if (parseInt(lastScore) > parseInt(data.KVDataList[1].value)) {
+                // console.log('lastscore');
                 saveMaxScore(lastScore);
                 myScore = lastScore;
             } else {
@@ -201,7 +207,7 @@ function saveMaxScore(maxScore) {
     wx.setUserCloudStorage({
         KVDataList: [{ 'key': 'maxScore', 'value': ('' + maxScore) }],
         success: res => {
-            console.log(res);
+            console.log('saveMaxScore: ' + maxScore);
         },
         fail: res => {
             console.log(res);
@@ -214,7 +220,9 @@ function getFriendsRanking() {
         keyList: ['score', 'maxScore'],
         success: res => {
             let data = res.data;
-            console.log('getFriendsRanking' + res.data);
+            // console.log('getFriendsRanking1: ' + (data[1].KVDataList[0].value || 0));
+            // console.log('getFriendsRanking1: ' + (data[1].KVDataList[1].value || 0));
+            // console.log('getFriendsRanking2: ' + (data[1].KVDataList[0].value || 0));
             // drawRankList(data);
             initRanklist(sortByScore(data));
             drawMyRank();
