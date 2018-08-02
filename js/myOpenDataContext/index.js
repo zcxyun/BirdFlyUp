@@ -76,7 +76,6 @@ function initRanklist(list) {
         } else {
             ctx.fillStyle = '#302F30';
         }
-        // console.log(itemCanvas.width);
         ctx.fillRect(0, i * itemHeight, itemCanvas.width, itemHeight);
     }
 
@@ -113,7 +112,6 @@ function getNickName(nickName = '') {
 
 // 绘制自己的排名
 function drawMyRank() {
-    // console.log(myInfo.avatarUrl && myScore >= 0);
     if (myInfo.avatarUrl && myScore >= 0) {
         context.clearRect(80, 960, 750 - 80 * 2, 120);
         context.fillStyle = '#302F30';
@@ -191,19 +189,15 @@ function getMyScore() {
         success: res => {
             let data = res;
             let lastScore = data.KVDataList[0] && data.KVDataList[0].value ? data.KVDataList[0].value : 0;
-            console.log('lastScore: ' + lastScore);
             if (!data.KVDataList[1]) {
                 saveMaxScore(lastScore);
                 myScore = lastScore;
             } else if (parseInt(lastScore) > parseInt(data.KVDataList[1].value)) {
-                // console.log('lastscore');
                 saveMaxScore(lastScore);
                 myScore = lastScore;
             } else {
                 myScore = data.KVDataList[1].value;
             }
-            console.log('myScore: ' + myScore);
-            // drawMyRank();
         }
     });
 }
@@ -212,10 +206,8 @@ function saveMaxScore(maxScore) {
     wx.setUserCloudStorage({
         KVDataList: [{ 'key': 'maxScore', 'value': ('' + maxScore) }],
         success: res => {
-            console.log('saveMaxScore: ' + maxScore);
         },
         fail: res => {
-            console.log(res);
         }
     });
 }
@@ -225,10 +217,6 @@ function getFriendsRanking() {
         keyList: ['score', 'maxScore'],
         success: res => {
             let data = res.data;
-            // console.log('getFriendsRanking1: ' + (data[1].KVDataList[0].value || 0));
-            // console.log('getFriendsRanking1: ' + (data[1].KVDataList[1].value || 0));
-            // console.log('getFriendsRanking2: ' + (data[1].KVDataList[0].value || 0));
-            // drawRankList(data);
             initRanklist(sortByScore(data));
             drawMyRank();
         }
@@ -240,15 +228,11 @@ function getGroupRanking(ticket) {
         shareTicket: ticket,
         keyList: ['score', 'maxScore'],
         success: res => {
-            console.log('getGroupCloudStorage:success');
-            console.log(res.data);
             let data = res.data;
             initRanklist(sortByScore(data));
             drawMyRank();
         },
         fail: res => {
-            console.log('getGroupCloudStorage:fail');
-            console.log(res.data);
         }
     });
 }
@@ -263,7 +247,6 @@ wx.onMessage(data => {
         getMyScore();
     } else if (data.type === 'updateMaxScore') {
         // 更新最高分
-        console.log('更新最高分');
         getMyScore();
     }
 });

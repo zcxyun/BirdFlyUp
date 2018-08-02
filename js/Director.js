@@ -1,7 +1,6 @@
 import { DataStore } from "./base/DataStore.js";
 import { PencilLeft } from "./runtime/PencilLeft.js";
 import { PencilRight } from "./runtime/PencilRight.js";
-import { Sprite } from "./base/Sprite.js";
 
 /**
  * 导演类 (控制游戏的逻辑)
@@ -88,7 +87,6 @@ export class Director {
             };
             // 管道的撞击判断
             if (Director.isStrike(birdsBorder, pencilBorder)) {
-                console.log('撞到铅笔啦');
                 this.dataStore.get('crashSound').play();
                 birds.willCrash = true;
                 this.gameStart = false;
@@ -121,7 +119,6 @@ export class Director {
         wx.setUserCloudStorage({
             KVDataList: [{ key: 'score', value: (wx.getStorageSync('maxScore') || 0).toString() }],
             success: (res) => {
-                console.log('更新云端最大分数：' + wx.getStorageSync('maxScore'));
                 this.messageSharecanvas('updateMaxScore');
             }
         });
@@ -158,10 +155,6 @@ export class Director {
     showRankInfo() {
         const screenWidth = this.dataStore.canvas.width;
         const screenHeight = this.dataStore.canvas.height;
-        // if (this.dataStore.shareTicket && !this.showGroupRank) {
-        //     this.showGroupRank = true;
-        //     this.messageSharecanvas('group', this.dataStore.shareTicket);
-        // }
         if (this.showRank) {
             this.dataStore.ctx.drawImage(this.dataStore.sharedCanvas, 0, 0, screenWidth, screenHeight);
         }

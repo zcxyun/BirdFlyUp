@@ -25,10 +25,6 @@ export class Land extends Sprite{
         if (Director.getInstance().gameStart) {
             this.landY = this.landY + this.landSpeed;
         }
-        // if (this.landX >= (this.img.width - DataStore.getInstance().canvas.width)) {
-
-        //     this.landX = 0;
-        // }
         super.draw(
             this.img,
             this.srcX, this.srcY,

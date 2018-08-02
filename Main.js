@@ -115,12 +115,6 @@ export class Main {
         });
         // 注册游戏第一次加载时所有的事件
         this.registerEvent();
-        // wx.removeUserCloudStorage({
-        //     keyList: ['score', 'maxScore'],
-        //     success: () => {
-        //         console.log('清空云端数据');
-        //     }
-        // });
         this.init();
     }
     /**
@@ -167,13 +161,10 @@ export class Main {
      */
     registerEvent() {
         wx.onShow(res => {
-            console.log('onShow');
             DataStore.getInstance().shareTicket = res.shareTicket;
-            console.log('shareTicket: ' + DataStore.getInstance().shareTicket);
             this.director.setUserCloud();
         });
         wx.onHide(() => {
-            console.log('onHide');
             this.director.setUserCloud();
         });
         wx.showShareMenu({ withShareTicket: true });
@@ -202,8 +193,6 @@ export class Main {
                     startButton.x, startButton.y,
                     startButton.width, startButton.height
                 ) && (!this.director.showRank)) {
-                    console.log(this.director.showRank, this.director.showGroupRank);
-                    console.log('游戏准备');
                     this.director.gameHome = false;
                     this.director.gameReady = true;
                     this.swooshSound.play();
@@ -214,7 +203,6 @@ export class Main {
             }
             // 判断是否已经进入游戏准备页面，如果是点击屏幕后开始游戏
             else if (this.director.gameReady === true) {
-                console.log('游戏开始');
                 this.director.gameReady = false;
                 this.director.gameStart = true;
                 this.moveSound.play();
@@ -232,7 +220,6 @@ export class Main {
                     startButton.x, startButton.y,
                     startButton.width, startButton.height
                 ) && (!this.director.showRank)) {
-                    console.log('游戏准备');
                     this.swooshSound.play();
                     // 取消一个先前通过调用 requestAnimationFrame 方法添加到计划中的动画帧请求
                     cancelAnimationFrame(this.dataStore.get('timer'));
@@ -271,12 +258,9 @@ export class Main {
             rank.width, rank.height
         ) && !this.director.showRank) {
             this.swooshSound.play();
-            console.log(this.dataStore.shareTicket);
             if (this.dataStore.shareTicket) {
-                console.log('showGroupRank');
                 this.director.messageSharecanvas('group', this.dataStore.shareTicket);
             } else {
-                console.log('showFriendRank');
                 this.director.messageSharecanvas();
             }
             this.director.showRank = true;
