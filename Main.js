@@ -115,12 +115,12 @@ export class Main {
         });
         // 注册游戏第一次加载时所有的事件
         this.registerEvent();
-        wx.removeUserCloudStorage({
-            keyList: ['score', 'maxScore'],
-            success: () => {
-                console.log('清空云端数据');
-            }
-        });
+        // wx.removeUserCloudStorage({
+        //     keyList: ['score', 'maxScore'],
+        //     success: () => {
+        //         console.log('清空云端数据');
+        //     }
+        // });
         this.init();
     }
     /**
@@ -138,8 +138,7 @@ export class Main {
         this.director.isGameOver = false;
         this.director.gameStart = false;
         this.director.showRank = false;
-        this.director.showGroupRank = false;
-        //
+        // this.director.showGroupRank = false;
         this.dataStore.put('background', BackGround)
             .put('land', Land)
             .put('pencils', [])
@@ -167,40 +166,16 @@ export class Main {
      * 游戏第一次加载时注册所有事件
      */
     registerEvent() {
-        // wx.onShow(() => {
-        //     wx.getUserCloudStorage({
-        //         keyList: ['maxScore'],
-        //         success: (resData) => {
-        //             let maxScore = res.KVDataList[0].value || 0;
-        //             wx.setStorageSync('maxScore', parseInt(maxScore));
-        //             console.log('首次启动从云端取出最大分数并存入本地缓存，最大值是：' + maxScore);
-        //             // wx.setUserCloudStorage({
-        //             //     KVDataList: [{key: 'score', value: maxScore}],
-        //             //     success: (res) => {
-        //             //         console.log('首次启动读取缓存中的最大分数并存入云端: ' + res);
-        //             //     },
-        //             //     fail: (res) => {
-        //             //         console.log('首次启动读取缓存中的最大分数并存入云端失败: ' + res);
-        //             //     }
-        //             // });
-        //         },
-        //         fail: (resData) => {
-        //             console.log('首次启动从云端取出最大分数并存入本地缓存失败：' + res);
-        //         }
-        //     });
-        // });
-        // wx.onHide((res) => {
-        //     wx.setUserCloudStorage({
-        //         KVDataList: [{ key: maxScore, value: wx.getStorageSync('maxScore') }],
-        //         success: (resData) => {
-        //             this.messageSharecanvas();
-        //             console.log('小游戏回到后台时更新云端用户最大分数，并通知开放数据域重绘sharedCanvas');
-        //         },
-        //         fail: (resData) => {
-        //             console.log('小游戏回到后台时更新云端用户最大分数失败');
-        //         }
-        //     });
-        // });
+        wx.onShow(res => {
+            console.log('onShow');
+            DataStore.getInstance().shareTicket = res.shareTicket;
+            console.log('shareTicket: ' + DataStore.getInstance().shareTicket);
+            this.director.setUserCloud();
+        });
+        wx.onHide(() => {
+            console.log('onHide');
+            this.director.setUserCloud();
+        });
         wx.showShareMenu({ withShareTicket: true });
         wx.onShareAppMessage(() => {
             // 用户点击了“转发”按钮
@@ -221,12 +196,13 @@ export class Main {
             const closeRank = this.dataStore.get('closeRank');
             // 判断是否已经进入主页，如果是点击屏幕后就进入游戏准备页
             if (this.director.gameHome === true) {
-                // 点击开始按钮
+                // 点击开始按钮(排行榜显示时按钮无法点击)
                 if (this.checkClickArea(
                     touchX, touchY,
                     startButton.x, startButton.y,
                     startButton.width, startButton.height
-                ) && (!this.director.showRank || !this.director.showGroupRank)) {
+                ) && (!this.director.showRank)) {
+                    console.log(this.director.showRank, this.director.showGroupRank);
                     console.log('游戏准备');
                     this.director.gameHome = false;
                     this.director.gameReady = true;
@@ -250,12 +226,12 @@ export class Main {
             }
             // 判断游戏是否结束，如果是就重启游戏
             else if (this.director.isGameOver) {
-                // 判断点击的坐标是否在 startButton 图片坐标内，如果在就开始游戏
+                // 判断点击的坐标是否在 startButton 图片坐标内，如果在就开始游戏（排行榜显示时按钮无法点击）
                 if (this.checkClickArea(
                     touchX, touchY,
                     startButton.x, startButton.y,
                     startButton.width, startButton.height
-                ) && (!this.director.showRank || !this.director.showGroupRank)) {
+                ) && (!this.director.showRank)) {
                     console.log('游戏准备');
                     this.swooshSound.play();
                     // 取消一个先前通过调用 requestAnimationFrame 方法添加到计划中的动画帧请求
@@ -271,37 +247,38 @@ export class Main {
             }
         });
     }
+
     /**
-     * 点击分享按钮
+     * 点击分享按钮（排行榜显示时按钮无法点击）
      */
     clickForwardButton(touchX, touchY, share) {
         if (this.checkClickArea(
             touchX, touchY,
             share.x, share.y,
             share.width, share.height
-        )) {
+        ) && !this.director.showRank) {
             this.swooshSound.play();
             this.forward('FlappyBirdUp');
         }
     }
     /**
-     * 点击排行榜按钮
+     * 点击排行榜按钮（排行榜显示时按钮无法点击）
      */
     clickRankButton(touchX, touchY, rank) {
         if (this.checkClickArea(
             touchX, touchY,
             rank.x, rank.y,
             rank.width, rank.height
-        )) {
+        ) && !this.director.showRank) {
             this.swooshSound.play();
-            // wx.setUserCloudStorage({
-            //     KVDataList: [{ key: maxScore, value: wx.getStorageSync('maxScore') }],
-            //     success: (res) => {
-            //         this.messageSharecanvas();
-            //         console.log('点击排行榜按钮后更新云端用户最大分数，并通知开放数据域重绘sharedCanvas');
-            //     }
-            // });
-            this.director.messageSharecanvas();
+            console.log(this.dataStore.shareTicket);
+            if (this.dataStore.shareTicket) {
+                console.log('showGroupRank');
+                this.director.messageSharecanvas('group', this.dataStore.shareTicket);
+            } else {
+                console.log('showFriendRank');
+                this.director.messageSharecanvas();
+            }
             this.director.showRank = true;
         }
     }
@@ -318,8 +295,6 @@ export class Main {
             this.director.showRank = false;
         }
     }
-
-
     /**
      * 检查屏幕点击区域是否在按钮区域内
      */

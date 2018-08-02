@@ -105,20 +105,26 @@ export class Director {
             });
             this.dataStore.get('pointSound').play();
             score.isScore = false;
-            score.scoreNumber += 2;
+            score.scoreNumber++;
             if (wx.getStorageSync('maxScore') < score.scoreNumber) {
                 score.hasNewScore = true;
+                // 最大分数存入本地缓存
                 wx.setStorageSync('maxScore', score.scoreNumber);
-
-                wx.setUserCloudStorage({
-                    KVDataList: [{key: 'score', value: score.scoreNumber.toString()}],
-                    success: (res) => {
-                        console.log('更新云端最大分数：' + score.scoreNumber);
-                        this.messageSharecanvas('updateMaxScore');
-                    }
-                });
+                this.setUserCloud();
             }
         }
+    }
+    /**
+     * 最大分数存入云端
+     */
+    setUserCloud() {
+        wx.setUserCloudStorage({
+            KVDataList: [{ key: 'score', value: (wx.getStorageSync('maxScore') || 0).toString() }],
+            success: (res) => {
+                console.log('更新云端最大分数：' + wx.getStorageSync('maxScore'));
+                this.messageSharecanvas('updateMaxScore');
+            }
+        });
     }
     messageSharecanvas(type, text) {
         // 排行榜也应该是实时的，所以需要sharedCanvas 绘制新的排行榜
@@ -152,12 +158,12 @@ export class Director {
     showRankInfo() {
         const screenWidth = this.dataStore.canvas.width;
         const screenHeight = this.dataStore.canvas.height;
+        // if (this.dataStore.shareTicket && !this.showGroupRank) {
+        //     this.showGroupRank = true;
+        //     this.messageSharecanvas('group', this.dataStore.shareTicket);
+        // }
         if (this.showRank) {
             this.dataStore.ctx.drawImage(this.dataStore.sharedCanvas, 0, 0, screenWidth, screenHeight);
-        }
-        if (this.dataStore.shareTicket && !this.showGroupRank) {
-            this.showGroupRank = true;
-            this.messageSharecanvas('group', this.dataStore.shareTicket);
         }
     }
     /**

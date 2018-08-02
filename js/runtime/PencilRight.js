@@ -9,7 +9,7 @@ export class PencilRight extends Pencil{
     constructor(left) {
         let image = Sprite.getImage('pencilRight');
         super(image, left);
-        this.gap = DataStore.getInstance().canvas.width / 3;
+        this.gap = DataStore.getInstance().canvas.width / 4;
         this.x = this.left + this.gap;
     }
 }

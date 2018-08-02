@@ -10,7 +10,7 @@ const ratio = wx.getSystemInfoSync().pixelRatio;
 let itemCanvas = wx.createCanvas();
 let ctx = itemCanvas.getContext('2d');
 
-let myScore = undefined;
+let myScore = 0;
 let myInfo = {};
 let myRank = undefined;
 initEle();
@@ -76,7 +76,7 @@ function initRanklist(list) {
         } else {
             ctx.fillStyle = '#302F30';
         }
-        console.log(itemCanvas.width);
+        // console.log(itemCanvas.width);
         ctx.fillRect(0, i * itemHeight, itemCanvas.width, itemHeight);
     }
 
@@ -91,7 +91,8 @@ function initRanklist(list) {
             ctx.fillStyle = '#fff';
             ctx.font = '28px Arial';
             ctx.textAlign = 'left';
-            ctx.fillText(item.nickname, 190, index * itemHeight + 54);
+            let nickName = getNickName(item.nickname);
+            ctx.fillText(nickName, 190, index * itemHeight + 54);
             ctx.font = 'bold 36px Arial';
             ctx.textAlign = 'right';
             ctx.fillText(item.score || 0, 550, index * itemHeight + 60);
@@ -106,9 +107,15 @@ function initRanklist(list) {
     reDrawItem(0);
 }
 
+function getNickName(nickName = '') {
+    return nickName.length > 5 ? nickName.substr(0, 5) + '...' : nickName;
+}
+
 // 绘制自己的排名
 function drawMyRank() {
-    if (myInfo.avatarUrl && myScore) {
+    // console.log(myInfo.avatarUrl && myScore >= 0);
+    if (myInfo.avatarUrl && myScore >= 0) {
+        context.clearRect(80, 960, 750 - 80 * 2, 120);
         context.fillStyle = '#302F30';
         context.fillRect(80, 960, 750 - 80 * 2, 120);
         let avatar = wx.createImage();
@@ -119,7 +126,8 @@ function drawMyRank() {
         context.fillStyle = '#fff';
         context.font = '28px Arial';
         context.textAlign = 'left';
-        context.fillText(myInfo.nickName, 270, 960 + 72);
+        let nickName = getNickName(myInfo.nickName);
+        context.fillText(nickName, 270, 960 + 72);
         context.font = 'bold 36px Arial';
         context.textAlign = 'right';
         context.fillText(myScore || 0, 630, 960 + 76);
@@ -138,20 +146,17 @@ function reDrawItem(y) {
     context.fillStyle = '#302F30';
     context.fillRect(80, 350, 750 - 80 * 2, 590);
     context.drawImage(itemCanvas, 0, y, 750 - 80 * 2, 590, 80, 350, 750 - 80 * 2, 590);
-    //
     // context.drawImage(itemCanvas, 40, y+175, screenWidth - 40 * 2, 295);
 }
 function sortByScore(data) {
     let array = [];
     data.map(item => {
-
         array.push({
             avatarUrl: item.avatarUrl,
             nickname: item.nickname,
             openid: item.openid,
             score: item['KVDataList'][1] && item['KVDataList'][1].value != 'undefined' ? item['KVDataList'][1].value : (item['KVDataList'][0] ? item['KVDataList'][0].value : 0) // 取最高分
         })
-
     })
     array.sort((a, b) => {
         let scoreA = parseInt(a['score']);
@@ -163,7 +168,6 @@ function sortByScore(data) {
     });
     if (myRank === -1)
         myRank = array.length;
-
     return array;
 }
 // 开放域的getUserInfo 不能获取到openId, 可以在主域获取，并从主域传送
@@ -186,9 +190,8 @@ function getMyScore() {
         keyList: ['score', 'maxScore'],
         success: res => {
             let data = res;
-            // console.log('获取自己的分数' + (data.KVDataList[0].value || 0));
-            // console.log('获取自己的分数' + data.KVDataList[0].value, data.KVDataList[1].value);
             let lastScore = data.KVDataList[0] && data.KVDataList[0].value ? data.KVDataList[0].value : 0;
+            console.log('lastScore: ' + lastScore);
             if (!data.KVDataList[1]) {
                 saveMaxScore(lastScore);
                 myScore = lastScore;
@@ -199,6 +202,8 @@ function getMyScore() {
             } else {
                 myScore = data.KVDataList[1].value;
             }
+            console.log('myScore: ' + myScore);
+            // drawMyRank();
         }
     });
 }
