@@ -40,7 +40,7 @@ export class Director {
     }
 
     /**
-     * 判断小鸟是否和铅笔撞击
+     * 判断小鸟是否和管道撞击
      */
     static isStrike(bird, pencil) {
         let s = true;
@@ -55,7 +55,7 @@ export class Director {
         return s;
     }
     /**
-     * 判断小鸟是否撞击地面和铅笔
+     * 判断小鸟是否撞击地面和管道
      */
     check() {
         const birds = this.dataStore.get('birds');

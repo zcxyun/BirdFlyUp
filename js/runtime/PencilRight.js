@@ -3,7 +3,7 @@ import { Sprite } from "../base/Sprite.js";
 import { DataStore } from "../base/DataStore.js";
 
 /**
- * 下半部分的铅笔图片类
+ * 右半部分的管道图片类
  */
 export class PencilRight extends Pencil{
     constructor(left) {

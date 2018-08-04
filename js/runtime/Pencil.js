@@ -3,7 +3,7 @@ import { DataStore } from "../base/DataStore.js";
 import { Director } from "../Director.js";
 
 /**
- * 铅笔基类
+ * 管道基类
  */
 export class Pencil extends Sprite {
     constructor(image, left) {
